@@ -20,7 +20,21 @@
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
       <a href='/urls/new'>Create a new URL</a>
-    <div class="card-footer text-muted"></div>
+    <div class="card-footer text-muted">
+      <h3>Edit</h3>
+        <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                  <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="New URL:">              </div>
+              <div class="col-sm">
+                  <input type="password" class="form-control" id="inputPassword2" placeholder="">
+                </div>
+              <div class="col-sm">
+                  <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                </div>
+            </div>
+          </div>
+    </div>
   </div>
 
   <!-- Bootstrap JS -->
