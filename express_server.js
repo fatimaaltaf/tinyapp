@@ -20,13 +20,22 @@ function generateRandomString() {
   return result;
 }
 
+function checkIfEmailAlreadyExists(email) {
+  for (let id in users) {
+    if (users[id].email === email) {
+      return true;
+    }
+  }
+  return false; 
+}
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
 // Users database
-const users = { 
+let users = { 
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
@@ -85,15 +94,22 @@ app.get("/urls/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
-// Register page submission 
-app.post("/urls/register", (req, res) => {
-  // new user object added to global users object. Should include id, email, password 
-  // generate random user id
-  let userId = generateString();
-  let users[userId] = {id: userId, email: req.body.email, password: req.body.password };
-  // set user_Id to cookie
-  res.cookie();
-  res.redirect('/urls');
+// POSTs to register 
+app.post("/register", (req, res) => {
+
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400);
+    res.send("400 Error - Bad Request: No email or password entered. Try again");
+  } else if (checkIfEmailAlreadyExists(req.body.email)) {
+    res.status(400);
+    res.send("This email already exists. Please use another email address");
+  } else {
+    let userId = generateRandomString();
+    users[userId] = {id: userId, email: req.body.email, password: req.body.password };
+    res.cookie('userId', userId);
+    console.log(users[userId]);
+    res.redirect('/urls');
+  }
 });
 
 // Page that shows shortened URL
