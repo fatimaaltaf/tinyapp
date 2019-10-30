@@ -64,6 +64,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);     
 });
 
+// LOGIN PAGE
+app.get("/urls/login", (req, res) => {
+  let templateVars = { user: users[req.cookies.userId] };
+  console.log('HELLOW WORLD');
+  res.render("urls_login", templateVars);
+})
+
 // POST request to login
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username); 

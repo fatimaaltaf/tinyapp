@@ -9,13 +9,13 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <a class="nav-item nav-link" href="/urls/register">Register Account</a>
+        <a class="nav-item nav-link" href="/urls/login">Login</a>
       </div>
     </div>
     <p><% if(user){ %>
       <h1> <form action='/logout' method='POST'>
       </h1>
        <p class="text-white">Logged in as: <%= user.email %></p>
-      
         <div class="col-auto">
           <label class="sr-only" for="inlineFormInputGroup">Username</label>
           <div class="input-group mb-2">
