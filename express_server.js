@@ -23,10 +23,16 @@ function generateRandomString() {
 function checkIfEmailAlreadyExists(email) {
   for (let id in users) {
     if (users[id].email === email) {
-      return true;
+      return users[id]; //  users[id]
     }
   }
   return false; 
+}
+
+function checkIfPasswordMatches(user, password) {
+  console.log(password);
+  console.log(user.password);
+  return user.password === password;
 }
 
 const urlDatabase = {
@@ -67,14 +73,22 @@ app.post("/urls", (req, res) => {
 // LOGIN PAGE
 app.get("/urls/login", (req, res) => {
   let templateVars = { user: users[req.cookies.userId] };
-  console.log('HELLOW WORLD');
   res.render("urls_login", templateVars);
 })
 
 // POST request to login
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username); 
-  res.redirect('/urls');
+  let user = checkIfEmailAlreadyExists(req.body.email);
+  if (!user) {
+    res.status(403);
+    res.send("403 Forbidden - user with that email cannot be found");
+  } else if (!checkIfPasswordMatches(user, req.body.password)) {
+    res.send("Password does not match the account. Please try again");
+    res.status(403);
+  } else {
+   res.cookie('userId', user.id)
+   res.redirect('/urls');
+  }
 });
 
 // POST request to logout
@@ -114,7 +128,6 @@ app.post("/register", (req, res) => {
     let userId = generateRandomString();
     users[userId] = {id: userId, email: req.body.email, password: req.body.password };
     res.cookie('userId', userId);
-    console.log(users[userId]);
     res.redirect('/urls');
   }
 });
