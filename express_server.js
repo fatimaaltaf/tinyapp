@@ -25,6 +25,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// Users database
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!")
@@ -66,6 +79,23 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// Register Page
+app.get("/urls/register", (req, res) => {
+  let templateVars = { username: req.cookies.username };
+  res.render("urls_register", templateVars);
+});
+
+// Register page submission 
+app.post("/urls/register", (req, res) => {
+  // new user object added to global users object. Should include id, email, password 
+  // generate random user id
+  let userId = generateString();
+  let users[userId] = {id: userId, email: req.body.email, password: req.body.password };
+  // set user_Id to cookie
+  res.cookie();
+  res.redirect('/urls');
+});
+
 // Page that shows shortened URL
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { username: req.cookies.username, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
@@ -88,10 +118,6 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
-})
+});
