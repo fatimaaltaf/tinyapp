@@ -53,7 +53,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { username: req.cookies.username, urls: urlDatabase };
+  let templateVars = { user: users[req.cookies.userId], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
@@ -72,7 +72,7 @@ app.post("/login", (req, res) => {
 
 // POST request to logout
 app.post("/logout", (req, res) => {
-  res.clearCookie('username', req.body.username);
+  res.clearCookie('userId', req.body.userId);
   res.redirect('/urls');
 });
 
@@ -84,13 +84,13 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Create New URL page
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies.username };
+  let templateVars = { user: users[req.cookies.userId] };
   res.render("urls_new", templateVars);
 });
 
 // Register Page
 app.get("/urls/register", (req, res) => {
-  let templateVars = { username: req.cookies.username };
+  let templateVars = { user: users[req.cookies.userId] };
   res.render("urls_register", templateVars);
 });
 
@@ -101,8 +101,8 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.send("400 Error - Bad Request: No email or password entered. Try again");
   } else if (checkIfEmailAlreadyExists(req.body.email)) {
-    res.status(400);
     res.send("This email already exists. Please use another email address");
+    res.status(400);
   } else {
     let userId = generateRandomString();
     users[userId] = {id: userId, email: req.body.email, password: req.body.password };
@@ -114,7 +114,7 @@ app.post("/register", (req, res) => {
 
 // Page that shows shortened URL
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { username: req.cookies.username, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  let templateVars = { user: users[req.cookies.userId], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
   res.render("urls_show", templateVars);
 });
 
