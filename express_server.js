@@ -62,7 +62,6 @@ const urlsForUser = function(id) {
         });
       } 
     }
-    console.log('urlsForUser', urlsForUser)
   return urlsForUser;
   };
 
@@ -161,6 +160,7 @@ app.post("/register", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let userId = req.cookies.userId;
+  console.log(userId, urlDatabase, shortURL, urlDatabase[shortURL]);
   if (userId === urlDatabase[shortURL].userId) {
     let templateVars = { user: users[req.cookies.userId], shortURL, longURL: urlDatabase[shortURL].longURL};
     res.render('urls_show', templateVars);
@@ -174,8 +174,9 @@ app.get("/urls/:shortURL", (req, res) => {
 // editing short url to long url
 app.post("/urls/:shortURL", (req, res) => {
   let userId = req.cookies.userId;
+  let shortURL = req.params.shortURL
+  urlDatabase[shortURL].longURL = req.body.longURL;
   if (userId) {
-    urlDatabase[req.params.shortURL] = req.body.longURL;
     res.redirect("/urls");
   } else {
     res.redirect("/login");
@@ -185,8 +186,9 @@ app.post("/urls/:shortURL", (req, res) => {
 //deletes URL from My URL page
 app.post("/urls/:shortURL/delete", (req, res) => { 
   let userId = req.cookies.userId;
+  let shortURL = req.params.shortURL;
   if (userId) {
-    delete urlDatabase[req.params.shortURL];
+    delete urlDatabase[shortURL];
     res.redirect('/urls');
   } else {
     res.redirect('/login');

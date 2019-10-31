@@ -34,11 +34,11 @@
             <td><%= url.shortUrl %></td>
             <td><%= url.longURL %></td>
             <td>
-                <a href="urls/<%= url %>">
+                <a href="urls/<%= url.shortUrl %>">
                   <button type="button" class="btn btn-info">Edit</button>
                 </a>
               </td>
-            <td><form method="POST" action="urls/<%= url %>/delete"><button type="submit" class="btn btn-info">Delete</button></form></td>
+            <td><form method="POST" action="urls/<%= url.shortUrl %>/delete"><button type="submit" class="btn btn-info">Delete</button></form></td>
           </tr>
         <% } %>
       </tbody>
