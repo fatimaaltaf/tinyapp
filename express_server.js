@@ -54,6 +54,7 @@ let users = {
   }
 }
 
+
 app.get("/", (req, res) => {
   res.send("Hello!")
 });
@@ -106,7 +107,11 @@ app.get("/u/:shortURL", (req, res) => {
 // Create New URL page
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: users[req.cookies.userId] };
-  res.render("urls_new", templateVars);
+  if (req.cookies.userId) {
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/urls/login');
+  }
 });
 
 // Register Page
@@ -122,8 +127,8 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.send("400 Error - Bad Request: No email or password entered. Try again");
   } else if (checkIfEmailAlreadyExists(req.body.email)) {
-    res.send("This email already exists. Please use another email address");
     res.status(400);
+    res.send("This email already exists. Please use another email address");
   } else {
     let userId = generateRandomString();
     users[userId] = {id: userId, email: req.body.email, password: req.body.password };
