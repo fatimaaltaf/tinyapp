@@ -53,6 +53,7 @@ let users = {
     password: "dishwasher-funk"
   }
 }
+console.log(users.id);
 
 
 app.get("/", (req, res) => {
@@ -64,10 +65,13 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// Index of urls 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  // urlDatabase[shortURL] = longURL 
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userId: req.cookies.userId};
+  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);     
 });
 
