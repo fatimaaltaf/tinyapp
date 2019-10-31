@@ -2,6 +2,7 @@ const express = require("express");
 var cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; //default port 8080
+const bcrypt = require('bcrypt');
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -51,6 +52,8 @@ let users = {
     password: "dishwasher-funk"
   }
 }
+console.log(users["userRandomID"]);
+console.log(users.id);
 
 const urlsForUser = function(id) {
   let urlsForUser = [];
@@ -97,10 +100,11 @@ app.get("/login", (req, res) => {
 // POST request to login
 app.post("/login", (req, res) => {
   let user = checkIfEmailAlreadyExists(req.body.email);
+  let password = user.password;
   if (!user) {
     res.status(403);
     res.send("403 Forbidden - user with that email cannot be found");
-  } else if (!checkIfPasswordMatches(user, req.body.password)) {
+  } else if (!bcrypt.compareSync(req.body.password, password)) {
     res.send("Password does not match the account. Please try again");
     res.status(403);
   } else {
@@ -108,6 +112,8 @@ app.post("/login", (req, res) => {
    res.redirect('/urls');
   }
 });
+
+// !checkIfPasswordMatches(user, req.body.password)
 
 // POST request to logout
 app.post("/logout", (req, res) => {
@@ -150,7 +156,10 @@ app.post("/register", (req, res) => {
     res.send("This email already exists. Please use another email address");
   } else {
     let userId = generateRandomString();
-    users[userId] = {id: userId, email: req.body.email, password: req.body.password };
+    users[userId] = { "id": userId, 
+                      "email": req.body.email,
+                      "password": bcrypt.hashSync(req.body.password, 10)
+                     };
     res.cookie('userId', userId);
     res.redirect('/urls');
   }
