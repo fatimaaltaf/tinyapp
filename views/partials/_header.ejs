@@ -8,11 +8,11 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <a class="nav-item nav-link" href="/urls/register">Register Account</a>
-        <a class="nav-item nav-link" href="/urls/login">Login</a>
+        <a class="nav-item nav-link" href="/register">Register Account</a>
+        <a class="nav-item nav-link" href="/login">Login</a>
       </div>
     </div>
-    <p><% if(user){ %>
+    <p><% if(typeof user !== 'undefined' && user){ %>
       <h1> <form action='/logout' method='POST'>
       </h1>
        <p class="text-white">Logged in as: <%= user.email %></p>
