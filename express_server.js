@@ -3,8 +3,10 @@ var cookieSession = require('cookie-session');
 const app = express();
 const PORT = 8080; //default port 8080
 const bcrypt = require('bcrypt');
-
 const bodyParser = require("body-parser");
+const { getUserFromEmail } = require("./helpers.js")
+
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 
@@ -22,24 +24,6 @@ function generateRandomString() {
      result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
-}
-
-// function checkIfEmailAlreadyExists(email, database) {
-//   let userId = users[id].email;  
-//   for (let id in database) {
-//     if (users[id].email === email) {
-//       return users[id]; //  users[id]
-//     }
-//   }
-//   return false; 
-// }
-
-function getUserFromEmail(email, database) {
-  for (let userId in database) {
-    if (database[userId].email === email) {
-      return database[userId];
-    }
-  }
 }
 
 function checkIfPasswordMatches(user, password) {

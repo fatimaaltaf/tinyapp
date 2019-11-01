@@ -8,10 +8,9 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-       
-      </div>
+       </div>
     </div>
-    <p><% if(typeof user !== 'undefined' && user){ %>
+    <% if(typeof user !== 'undefined' && user){ %>
       <h1> <form action='/logout' method='POST'>
       </h1>
        <p class="text-white">Logged in as: <%= user.email %></p>
@@ -23,11 +22,12 @@
             <button type="submit" class="btn btn-secondary mb-2">logout</button>
           </div>
       </div>
-    </form></h1>
     <% } else{ %>  
+    <div class="navbar-nav">
       <h1> <a class="nav-item nav-link class=btn btn-secondary mb-2" href="/register">Register Account</a>
         <a class="nav-item nav-link class=btn btn-secondary mb-2" href="/login">Login</a>
-    </form></h1>
-   <% } %></p>
+    </form>
+   <% } %>
+    </div>
   </nav>
 </header>
