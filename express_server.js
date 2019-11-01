@@ -1,5 +1,5 @@
 const express = require("express");
-var cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session');
 const app = express();
 const PORT = 8080; //default port 8080
 const bcrypt = require('bcrypt');
@@ -9,7 +9,10 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 app.set("view engine", "ejs");
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["key1", "key2"]
+}));
 
 function generateRandomString() {
   let result = '';
@@ -21,17 +24,26 @@ function generateRandomString() {
   return result;
 }
 
-function checkIfEmailAlreadyExists(email) {
-  for (let id in users) {
-    if (users[id].email === email) {
-      return users[id]; //  users[id]
+// function checkIfEmailAlreadyExists(email, database) {
+//   let userId = users[id].email;  
+//   for (let id in database) {
+//     if (users[id].email === email) {
+//       return users[id]; //  users[id]
+//     }
+//   }
+//   return false; 
+// }
+
+function getUserFromEmail(email, database) {
+  for (let userId in database) {
+    if (database[userId].email === email) {
+      return database[userId];
     }
   }
-  return false; 
 }
 
 function checkIfPasswordMatches(user, password) {
-  return user.password === password;
+  return bcrypt.compareSync(user.password, password)
 }
 
 const urlDatabase = {
@@ -52,8 +64,6 @@ let users = {
     password: "dishwasher-funk"
   }
 }
-console.log(users["userRandomID"]);
-console.log(users.id);
 
 const urlsForUser = function(id) {
   let urlsForUser = [];
@@ -73,10 +83,10 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let userId = req.cookies.userId;
+  let userId = req.session.userId;
    if (users[userId]) {
-    let urls = urlsForUser(req.cookies.userId);
-    let templateVars = { user: users[req.cookies.userId], urls: urls };
+    let urls = urlsForUser(req.session.userId);
+    let templateVars = { user: users[req.session.userId], urls: urls };
     res.render('urls_index', templateVars);
   } else {
     res.render('urls_login', { notification: 'You are not logged in.' })
@@ -87,28 +97,28 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[shortURL] = { longURL: req.body.longURL, userId: req.cookies.userId};
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userId: req.session.userId};
   res.redirect(`/urls/${shortURL}`);     
 });
 
 // LOGIN PAGE
 app.get("/login", (req, res) => {
-  let templateVars = { user: users[req.cookies.userId] };
+  let templateVars = { user: users[req.session.userId] };
   res.render("urls_login", templateVars);
 })
 
 // POST request to login
 app.post("/login", (req, res) => {
-  let user = checkIfEmailAlreadyExists(req.body.email);
-  let password = user.password;
+  // let userExists = checkIfEmailAlreadyExists(req.body.email, users);
+  let user = getUserFromEmail(req.body.email, users);
   if (!user) {
     res.status(403);
     res.send("403 Forbidden - user with that email cannot be found");
-  } else if (!bcrypt.compareSync(req.body.password, password)) {
+  } else if (checkIfPasswordMatches(user, req.body.password)) {
     res.send("Password does not match the account. Please try again");
     res.status(403);
   } else {
-   res.cookie('userId', user.id)
+   req.session.userId = user.id;
    res.redirect('/urls');
   }
 });
@@ -117,7 +127,7 @@ app.post("/login", (req, res) => {
 
 // POST request to logout
 app.post("/logout", (req, res) => {
-  res.clearCookie('userId', req.body.userId);
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -131,8 +141,8 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Create New URL page
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies.userId] };
-  if (req.cookies.userId) {
+  let templateVars = { user: users[req.session.userId] };
+  if (req.session.userId) {
     res.render('urls_new', templateVars);
   } else {
     res.redirect('/login');
@@ -141,7 +151,7 @@ app.get("/urls/new", (req, res) => {
 
 // Register Page
 app.get("/register", (req, res) => {
-  let templateVars = { user: users[req.cookies.userId] };
+  let templateVars = { user: users[req.session.userId] };
   res.render("urls_register", templateVars);
 });
 
@@ -151,7 +161,7 @@ app.post("/register", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
     res.status(400);
     res.send("400 Error - Bad Request: No email or password entered. Try again");
-  } else if (checkIfEmailAlreadyExists(req.body.email)) {
+  } else if (getUserFromEmail(req.body.email, users)) {
     res.status(400);
     res.send("This email already exists. Please use another email address");
   } else {
@@ -160,7 +170,7 @@ app.post("/register", (req, res) => {
                       "email": req.body.email,
                       "password": bcrypt.hashSync(req.body.password, 10)
                      };
-    res.cookie('userId', userId);
+    req.session.userId = userId;
     res.redirect('/urls');
   }
 });
@@ -168,10 +178,9 @@ app.post("/register", (req, res) => {
 // Page that shows shortened URL
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let userId = req.cookies.userId;
-  console.log(userId, urlDatabase, shortURL, urlDatabase[shortURL]);
+  let userId = req.session.userId;
   if (userId === urlDatabase[shortURL].userId) {
-    let templateVars = { user: users[req.cookies.userId], shortURL, longURL: urlDatabase[shortURL].longURL};
+    let templateVars = { user: users[req.session.userId], shortURL, longURL: urlDatabase[shortURL].longURL};
     res.render('urls_show', templateVars);
   } else if (users[userId]) {
     res.render('urls_index', { notification: 'This short url does not belong to you.', urls: [] })
@@ -182,7 +191,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // editing short url to long url
 app.post("/urls/:shortURL", (req, res) => {
-  let userId = req.cookies.userId;
+  let userId = req.session.userId;
   let shortURL = req.params.shortURL
   urlDatabase[shortURL].longURL = req.body.longURL;
   if (userId) {
@@ -194,7 +203,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //deletes URL from My URL page
 app.post("/urls/:shortURL/delete", (req, res) => { 
-  let userId = req.cookies.userId;
+  let userId = req.session.userId;
   let shortURL = req.params.shortURL;
   if (userId) {
     delete urlDatabase[shortURL];
