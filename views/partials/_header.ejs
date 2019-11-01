@@ -13,15 +13,9 @@
     </div>
     <% if(typeof user !== 'undefined' && user){ %>
       <form action='/logout' method='POST'>
-        <p class="text-white">Logged in as: <%= user.email %></p>
-        <div class="col-auto">
-          <label class="sr-only" for="inlineFormInputGroup">Username</label>
-          <div class="input-group mb-2">
-            <div class="input-group-prepend">
-            </div>
-            <button type="submit" class="btn btn-secondary mb-2">logout</button>
-          </div>
-        </div>
+        <p class="d-inline text-white">Logged in as: <%= user.email %></p>
+        &nbsp;
+        <button type="submit" class="d-inline btn btn-secondary mb-2">logout</button>
       </form>
       <% } else{ %>
       <div class="btn-toolbar">
